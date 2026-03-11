@@ -5,214 +5,382 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Billiards Club Manager</title>
     <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #f0f2f5; 
-            margin: 0; 
-            padding: 10px; /* Reduced padding for mobile */
-            color: #333; 
-        }
-        h1 { 
-            text-align: center; 
-            color: #2c3e50; 
-            font-size: 1.5em; /* Scaled down slightly for mobile headers */
-            margin-top: 10px;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 10px; color: #333; }
+        h1 { text-align: center; color: #2c3e50; font-size: 1.5em; margin-top: 10px; }
         
-        .dashboard { 
-            display: grid; 
-            /* Automatically stacks cards on mobile, sits side-by-side on tablets/desktop */
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-            gap: 15px; 
-            max-width: 1200px; 
-            margin: 0 auto; 
-        }
-        
-        .table-card { 
-            background: white; 
-            padding: 20px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
-            text-align: center; 
-        }
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; max-width: 1200px; margin: 0 auto; }
+        .table-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: center; }
         .snooker-card { border-top: 6px solid #e74c3c; } 
         .pool-card { border-top: 6px solid #3498db; } 
         
         .table-title { font-size: 1.4em; font-weight: bold; margin-bottom: 5px; }
-        .rate-info { color: #7f8c8d; font-size: 0.9em; margin-bottom: 10px; }
-        .status { font-size: 1.2em; font-weight: bold; margin: 10px 0; color: #27ae60; }
-        .time-display { font-size: 1em; margin: 10px 0; min-height: 20px; color: #555;}
+        .rate-info { color: #7f8c8d; font-size: 0.9em; margin-bottom: 15px; }
         
-        /* Mobile-friendly button layout */
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        button { 
-            flex: 1; /* Makes buttons equal width */
-            padding: 15px 10px; /* Taller padding for easy thumb tapping */
-            font-size: 1em; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            color: white; 
-            transition: 0.2s; 
-            /* Prevents text selection when double-tapping fast */
-            user-select: none; 
-            -webkit-tap-highlight-color: transparent;
-        }
-        .start-btn { background-color: #2ecc71; }
-        .start-btn:active { background-color: #27ae60; } /* :active works better than :hover for touch screens */
-        .stop-btn { background-color: #e74c3c; }
-        .stop-btn:active { background-color: #c0392b; }
-        button:disabled { background-color: #bdc3c7; cursor: not-allowed; opacity: 0.7; }
+        .time-inputs { display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px; }
+        .input-row { display: flex; align-items: center; justify-content: space-between; background-color: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #e9ecef; }
+        .input-row label { font-weight: bold; color: #555; font-size: 0.9em; }
+        input[type="time"], input[type="text"] { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 1.1em; font-family: inherit; background-color: white; box-sizing: border-box; }
+        input[type="time"] { width: 130px; }
         
-        .history-section { 
-            max-width: 1200px; 
-            margin: 30px auto 20px; 
-            background: white; 
-            padding: 15px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
-        }
-        .history-section h2 { font-size: 1.3em; margin-top: 0; }
+        .calc-btn { width: 100%; padding: 15px; font-size: 1.1em; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; background-color: #2ecc71; transition: 0.2s; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .calc-btn:active { background-color: #27ae60; } 
         
-        /* Makes the table horizontally scrollable on small screens */
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-        }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 500px; /* Forces table to be wide enough to read */ }
-        th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #ddd; font-size: 0.9em; }
+        .action-btns { display: flex; gap: 5px; }
+        .edit-btn, .delete-btn { border: none; border-radius: 6px; padding: 8px 12px; font-size: 1em; cursor: pointer; font-weight: bold; }
+        .edit-btn { background-color: #e8f4f8; color: #3498db; border: 1px solid #b3e0ff; }
+        .edit-btn:active { background-color: #b3e0ff; }
+        .delete-btn { background-color: #ffdddd; color: #d32f2f; border: 1px solid #ffb3b3; }
+        .delete-btn:active { background-color: #ffb3b3; }
+
+        .history-section { max-width: 1200px; margin: 30px auto 20px; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .history-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #f0f2f5; }
+        .history-header h2 { margin: 0; font-size: 1.2em; }
+        
+        .full-date-text { color: #3498db; font-weight: bold; }
+        .date-picker-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        input[type="date"] { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 1em; font-family: inherit; }
+        
+        .export-btn { background-color: #3498db; color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.9em; }
+        .export-btn:active { background-color: #2980b9; }
+
+        .daily-total { font-size: 1.2em; font-weight: bold; color: #27ae60; background: #e8f8f5; padding: 8px 12px; border-radius: 8px; }
+        
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #ddd; font-size: 0.9em; vertical-align: middle; }
         th { background-color: #f8f9fa; white-space: nowrap; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 350px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .modal-content h3 { margin-top: 0; color: #2c3e50; text-align: center; }
+        .modal-group { margin-bottom: 15px; }
+        .modal-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 0.9em; }
+        .modal-group input { width: 100%; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-btn { flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; font-size: 1em; }
+        .save-btn { background-color: #2ecc71; }
+        .save-btn:active { background-color: #27ae60; }
+        .cancel-btn { background-color: #95a5a6; }
+        .cancel-btn:active { background-color: #7f8c8d; }
+        
+        /* Cloud Status Indicator */
+        .cloud-status { text-align: center; font-weight: bold; margin-top: 5px; font-size: 0.9em; }
+        .status-offline { color: #e74c3c; }
+        .status-online { color: #27ae60; }
     </style>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
 
     <h1>🎱 Club Manager</h1>
+    <div id="connection-status" class="cloud-status status-offline">☁️ App is Offline (Local Mode)</div>
 
     <div class="dashboard">
         <div class="table-card snooker-card">
             <div class="table-title">Snooker 1</div>
             <div class="rate-info">4 Rs / Min</div>
-            <div class="status" id="status-s1">Available</div>
-            <div class="time-display" id="time-s1"></div>
-            <div class="btn-group">
-                <button class="start-btn" id="start-s1" onclick="startTimer('s1', 'Snooker 1', 4)">Start</button>
-                <button class="stop-btn" id="stop-s1" onclick="stopTimer('s1')" disabled>Stop</button>
+            <div class="time-inputs">
+                <div class="input-row"><label>Start Time:</label><input type="time" id="start-s1"></div>
+                <div class="input-row"><label>End Time:</label><input type="time" id="end-s1"></div>
             </div>
+            <button class="calc-btn" onclick="calculateBill('s1', 'Snooker 1', 4)">Calculate & Bill</button>
         </div>
 
         <div class="table-card snooker-card">
             <div class="table-title">Snooker 2</div>
             <div class="rate-info">4 Rs / Min</div>
-            <div class="status" id="status-s2">Available</div>
-            <div class="time-display" id="time-s2"></div>
-            <div class="btn-group">
-                <button class="start-btn" id="start-s2" onclick="startTimer('s2', 'Snooker 2', 4)">Start</button>
-                <button class="stop-btn" id="stop-s2" onclick="stopTimer('s2')" disabled>Stop</button>
+            <div class="time-inputs">
+                <div class="input-row"><label>Start Time:</label><input type="time" id="start-s2"></div>
+                <div class="input-row"><label>End Time:</label><input type="time" id="end-s2"></div>
             </div>
+            <button class="calc-btn" onclick="calculateBill('s2', 'Snooker 2', 4)">Calculate & Bill</button>
         </div>
 
         <div class="table-card snooker-card">
             <div class="table-title">Snooker 3</div>
             <div class="rate-info">4 Rs / Min</div>
-            <div class="status" id="status-s3">Available</div>
-            <div class="time-display" id="time-s3"></div>
-            <div class="btn-group">
-                <button class="start-btn" id="start-s3" onclick="startTimer('s3', 'Snooker 3', 4)">Start</button>
-                <button class="stop-btn" id="stop-s3" onclick="stopTimer('s3')" disabled>Stop</button>
+            <div class="time-inputs">
+                <div class="input-row"><label>Start Time:</label><input type="time" id="start-s3"></div>
+                <div class="input-row"><label>End Time:</label><input type="time" id="end-s3"></div>
             </div>
+            <button class="calc-btn" onclick="calculateBill('s3', 'Snooker 3', 4)">Calculate & Bill</button>
         </div>
 
         <div class="table-card pool-card">
             <div class="table-title">POOL</div>
             <div class="rate-info">3 Rs / Min</div>
-            <div class="status" id="status-p1">Available</div>
-            <div class="time-display" id="time-p1"></div>
-            <div class="btn-group">
-                <button class="start-btn" id="start-p1" onclick="startTimer('p1', 'POOL', 3)">Start</button>
-                <button class="stop-btn" id="stop-p1" onclick="stopTimer('p1')" disabled>Stop</button>
+            <div class="time-inputs">
+                <div class="input-row"><label>Start Time:</label><input type="time" id="start-p1"></div>
+                <div class="input-row"><label>End Time:</label><input type="time" id="end-p1"></div>
             </div>
+            <button class="calc-btn" onclick="calculateBill('p1', 'POOL', 3)">Calculate & Bill</button>
         </div>
     </div>
 
     <div class="history-section">
-        <h2>Today's Log</h2>
+        <div class="history-header">
+            <h2>Log: <span id="display-date" class="full-date-text"></span></h2>
+            <div class="date-picker-container">
+                <input type="date" id="history-date" onchange="renderHistory()">
+                <button class="export-btn" onclick="exportToCSV()">📥 Download Today's Log</button>
+            </div>
+            <div class="daily-total" id="daily-total">Total: ₹0</div>
+        </div>
+        
         <div class="table-responsive">
             <table id="history-table">
                 <thead>
                     <tr>
                         <th>Table</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
+                        <th>Start</th>
+                        <th>End</th>
                         <th>Duration</th>
+                        <th>Client Name</th>
                         <th>Bill</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
-                <tbody id="history-body">
-                    </tbody>
+                <tbody id="history-body"></tbody>
             </table>
         </div>
     </div>
 
-    <script>
-        let activeSessions = {};
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>✏️ Edit Session</h3>
+            <input type="hidden" id="edit-record-id">
+            <div class="modal-group"><label>Client Name:</label><input type="text" id="edit-client-name"></div>
+            <div class="modal-group"><label>Start Time:</label><input type="time" id="edit-start-time"></div>
+            <div class="modal-group"><label>End Time:</label><input type="time" id="edit-end-time"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel-btn" onclick="closeEditModal()">Cancel</button>
+                <button class="modal-btn save-btn" onclick="saveEditedRecord()">Save Changes</button>
+            </div>
+        </div>
+    </div>
 
-        function formatTime(date) {
-            // Using a shorter time format for mobile screens
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    <script>
+        // ==========================================
+        // 🔥 STEP 4: PASTE YOUR FIREBASE KEYS BELOW 🔥
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6io9GwB1S4-BxFJZ8Xbqt--n2OWBV_2k",
+            authDomain: "billiards-club-3e183.firebaseapp.com",
+            databaseURL: "https://billiards-club-3e183-default-rtdb.firebaseio.com",
+            projectId: "billiards-club-3e183",
+            storageBucket: "billiards-club-3e183.firebasestorage.app",
+            messagingSenderId: "175515579782",
+            appId: "1:175515579782:web:dd1ef74284cf8832e46807"
+        };
+        // ==========================================
+
+        let sessionData = [];
+        let isCloudConnected = false;
+        let db;
+
+        // Verify if the user updated the keys before trying to connect
+        if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            isCloudConnected = true;
+            
+            document.getElementById('connection-status').innerText = "☁️ App is Online (Synced with Partner)";
+            document.getElementById('connection-status').className = "cloud-status status-online";
+
+            // Listen for changes from the cloud
+            db.ref('billiardsData').on('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    sessionData = snapshot.val() || [];
+                } else {
+                    sessionData = [];
+                }
+                renderHistory(); 
+            });
+        } else {
+            sessionData = JSON.parse(localStorage.getItem('billiardsData')) || [];
         }
 
-        function startTimer(tableId, tableName, rate) {
-            const startTime = new Date();
+        window.onload = () => {
+            setInputsToCurrentTime();
+            setDatePickerToToday();
+            if (!isCloudConnected) renderHistory(); 
+        };
+
+        function syncData() {
+            if (isCloudConnected) {
+                db.ref('billiardsData').set(sessionData);
+            } else {
+                localStorage.setItem('billiardsData', JSON.stringify(sessionData));
+                renderHistory(); 
+            }
+        }
+
+        function setInputsToCurrentTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const currentTimeStr = `${hours}:${minutes}`;
+            ['s1', 's2', 's3', 'p1'].forEach(id => {
+                document.getElementById(`start-${id}`).value = currentTimeStr;
+                document.getElementById(`end-${id}`).value = currentTimeStr;
+            });
+        }
+
+        function setDatePickerToToday() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('history-date').value = today;
+        }
+
+        function formatTime12Hour(timeString) {
+            let [hours, minutes] = timeString.split(':');
+            let h = parseInt(hours, 10);
+            let ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12;
+            h = h ? h : 12; 
+            return `${String(h).padStart(2, '0')}:${minutes} ${ampm}`;
+        }
+
+        function calculateBill(tableId, tableName, rate) {
+            const startStr = document.getElementById(`start-${tableId}`).value;
+            const endStr = document.getElementById(`end-${tableId}`).value;
+            if (!startStr || !endStr) { alert("Please enter both Start and End times."); return; }
+
+            let startTime = new Date(); let [startH, startM] = startStr.split(':');
+            startTime.setHours(parseInt(startH, 10), parseInt(startM, 10), 0, 0);
+
+            let endTime = new Date(); let [endH, endM] = endStr.split(':');
+            endTime.setHours(parseInt(endH, 10), parseInt(endM, 10), 0, 0);
+
+            if (endTime < startTime) endTime.setDate(endTime.getDate() + 1);
+
+            const diffInMs = endTime - startTime;
+            const diffInMinutes = Math.ceil(diffInMs / 60000);
+
+            if (diffInMinutes === 0) { alert("Start time and End time cannot be exactly the same."); return; }
+
+            const totalBill = diffInMinutes * rate;
+            let clientName = prompt(`${tableName} Bill Ready!\n\nDuration: ${diffInMinutes} mins\nAmount: ₹${totalBill}\n\nEnter Client's Name:`, "Guest");
             
-            activeSessions[tableId] = {
-                name: tableName,
-                rate: rate,
-                startTime: startTime
+            if (clientName === null) return; 
+            if (clientName.trim() === "") clientName = "Guest";
+
+            const selectedDate = document.getElementById('history-date').value;
+            const newRecord = {
+                id: Date.now(), date: selectedDate, clientName: clientName.replace(/,/g, ""), 
+                tableName: tableName, startStr: startStr, endStr: endStr, duration: diffInMinutes, bill: totalBill
             };
 
-            document.getElementById(`status-${tableId}`).innerText = "Playing";
-            document.getElementById(`status-${tableId}`).style.color = "#e74c3c";
-            document.getElementById(`time-${tableId}`).innerText = `Started: ${formatTime(startTime)}`;
-            
-            document.getElementById(`start-${tableId}`).disabled = true;
-            document.getElementById(`stop-${tableId}`).disabled = false;
+            sessionData.push(newRecord);
+            syncData();
+            setInputsToCurrentTime();
         }
 
-        function stopTimer(tableId) {
-            const endTime = new Date();
-            const session = activeSessions[tableId];
+        function openEditModal(recordId) {
+            const record = sessionData.find(r => r.id === recordId);
+            if (!record) return;
+            document.getElementById('edit-record-id').value = record.id;
+            document.getElementById('edit-client-name').value = record.clientName;
+            document.getElementById('edit-start-time').value = record.startStr;
+            document.getElementById('edit-end-time').value = record.endStr;
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
+
+        function closeEditModal() { document.getElementById('edit-modal').style.display = 'none'; }
+
+        function saveEditedRecord() {
+            const recordId = parseInt(document.getElementById('edit-record-id').value);
+            const newName = document.getElementById('edit-client-name').value;
+            const newStart = document.getElementById('edit-start-time').value;
+            const newEnd = document.getElementById('edit-end-time').value;
+
+            if (!newStart || !newEnd) return;
+            const recordIndex = sessionData.findIndex(r => r.id === recordId);
+            if (recordIndex === -1) return;
             
-            const diffInMs = endTime - session.startTime;
-            const diffInMinutes = Math.ceil(diffInMs / 60000); 
-            const totalBill = diffInMinutes * session.rate;
+            const record = sessionData[recordIndex];
+            const rate = record.tableName.includes("Snooker") ? 4 : 3;
 
-            // Mobile-friendly alert message
-            alert(`${session.name} Bill\n\nTime: ${diffInMinutes} mins\nAmount: ${totalBill} Rs`);
+            let startTime = new Date(); let [startH, startM] = newStart.split(':');
+            startTime.setHours(parseInt(startH, 10), parseInt(startM, 10), 0, 0);
 
+            let endTime = new Date(); let [endH, endM] = newEnd.split(':');
+            endTime.setHours(parseInt(endH, 10), parseInt(endM, 10), 0, 0);
+
+            if (endTime < startTime) endTime.setDate(endTime.getDate() + 1);
+
+            const diffInMs = endTime - startTime;
+            const diffInMinutes = Math.ceil(diffInMs / 60000);
+            if (diffInMinutes === 0) return;
+
+            sessionData[recordIndex].clientName = newName.trim() === "" ? "Guest" : newName.replace(/,/g, "");
+            sessionData[recordIndex].startStr = newStart;
+            sessionData[recordIndex].endStr = newEnd;
+            sessionData[recordIndex].duration = diffInMinutes;
+            sessionData[recordIndex].bill = diffInMinutes * rate;
+
+            closeEditModal();
+            syncData(); 
+        }
+
+        function deleteEntry(recordId) {
+            if (confirm("Are you sure you want to delete this entry forever?")) {
+                sessionData = sessionData.filter(record => record.id !== recordId);
+                syncData(); 
+            }
+        }
+
+        function renderHistory() {
             const tbody = document.getElementById("history-body");
-            const row = tbody.insertRow(0); 
-            row.innerHTML = `
-                <td><strong>${session.name}</strong></td>
-                <td>${formatTime(session.startTime)}</td>
-                <td>${formatTime(endTime)}</td>
-                <td>${diffInMinutes} min</td>
-                <td style="color: #27ae60;"><strong>₹${totalBill}</strong></td>
-            `;
-
-            document.getElementById(`status-${tableId}`).innerText = "Available";
-            document.getElementById(`status-${tableId}`).style.color = "#27ae60";
-            document.getElementById(`time-${tableId}`).innerText = "";
+            tbody.innerHTML = ""; 
             
-            document.getElementById(`start-${tableId}`).disabled = false;
-            document.getElementById(`stop-${tableId}`).disabled = true;
+            const selectedDateStr = document.getElementById('history-date').value;
+            if (selectedDateStr) {
+                const [year, month, day] = selectedDateStr.split('-');
+                const dateObj = new Date(year, month - 1, day);
+                document.getElementById('display-date').innerText = dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            }
+            
+            const dailyRecords = sessionData.filter(record => record.date === selectedDateStr);
+            let dailyTotal = 0;
 
-            delete activeSessions[tableId];
+            dailyRecords.slice().reverse().forEach(record => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><strong>${record.tableName}</strong></td>
+                    <td>${formatTime12Hour(record.startStr)}</td>
+                    <td>${formatTime12Hour(record.endStr)}</td>
+                    <td>${record.duration} min</td>
+                    <td>${record.clientName}</td>
+                    <td style="color: #27ae60;"><strong>₹${record.bill}</strong></td>
+                    <td class="action-btns">
+                        <button class="edit-btn" onclick="openEditModal(${record.id})">✏️</button>
+                        <button class="delete-btn" onclick="deleteEntry(${record.id})">❌</button>
+                    </td>
+                `;
+                dailyTotal += record.bill; 
+            });
+            document.getElementById('daily-total').innerText = `Total: ₹${dailyTotal}`;
+        }
+
+        function exportToCSV() {
+            const selectedDateStr = document.getElementById('history-date').value;
+            const dailyRecords = sessionData.filter(record => record.date === selectedDateStr);
+            if (dailyRecords.length === 0) { alert("No records to download for this date."); return; }
+
+            let csvContent = "data:text/csv;charset=utf-8,Table Name,Start Time,End Time,Duration (Mins),Client Name,Bill (Rs)\n";
+            let dailyTotal = 0;
+            dailyRecords.slice().reverse().forEach(record => {
+                csvContent += `${record.tableName},${formatTime12Hour(record.startStr)},${formatTime12Hour(record.endStr)},${record.duration},${record.clientName},${record.bill}\n`;
+                dailyTotal += record.bill;
+            });
+            csvContent += `\n,,,,,TOTAL EARNINGS: ${dailyTotal} Rs\n`;
+
+            const link = document.createElement("a");
+            link.setAttribute("href", encodeURI(csvContent));
+            link.setAttribute("download", `Billiards_Club_Log_${selectedDateStr}.csv`);
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
     </script>
 </body>
