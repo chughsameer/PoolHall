@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Billiards Club Manager</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f0f2f5; 
+            margin: 0; 
+            padding: 10px; /* Reduced padding for mobile */
+            color: #333; 
+        }
+        h1 { 
+            text-align: center; 
+            color: #2c3e50; 
+            font-size: 1.5em; /* Scaled down slightly for mobile headers */
+            margin-top: 10px;
+        }
+        
+        .dashboard { 
+            display: grid; 
+            /* Automatically stacks cards on mobile, sits side-by-side on tablets/desktop */
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 15px; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+        }
+        
+        .table-card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+            text-align: center; 
+        }
+        .snooker-card { border-top: 6px solid #e74c3c; } 
+        .pool-card { border-top: 6px solid #3498db; } 
+        
+        .table-title { font-size: 1.4em; font-weight: bold; margin-bottom: 5px; }
+        .rate-info { color: #7f8c8d; font-size: 0.9em; margin-bottom: 10px; }
+        .status { font-size: 1.2em; font-weight: bold; margin: 10px 0; color: #27ae60; }
+        .time-display { font-size: 1em; margin: 10px 0; min-height: 20px; color: #555;}
+        
+        /* Mobile-friendly button layout */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        button { 
+            flex: 1; /* Makes buttons equal width */
+            padding: 15px 10px; /* Taller padding for easy thumb tapping */
+            font-size: 1em; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            color: white; 
+            transition: 0.2s; 
+            /* Prevents text selection when double-tapping fast */
+            user-select: none; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        .start-btn { background-color: #2ecc71; }
+        .start-btn:active { background-color: #27ae60; } /* :active works better than :hover for touch screens */
+        .stop-btn { background-color: #e74c3c; }
+        .stop-btn:active { background-color: #c0392b; }
+        button:disabled { background-color: #bdc3c7; cursor: not-allowed; opacity: 0.7; }
+        
+        .history-section { 
+            max-width: 1200px; 
+            margin: 30px auto 20px; 
+            background: white; 
+            padding: 15px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+        }
+        .history-section h2 { font-size: 1.3em; margin-top: 0; }
+        
+        /* Makes the table horizontally scrollable on small screens */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 500px; /* Forces table to be wide enough to read */ }
+        th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #ddd; font-size: 0.9em; }
+        th { background-color: #f8f9fa; white-space: nowrap; }
+    </style>
+</head>
+<body>
+
+    <h1>🎱 Club Manager</h1>
+
+    <div class="dashboard">
+        <div class="table-card snooker-card">
+            <div class="table-title">Snooker 1</div>
+            <div class="rate-info">4 Rs / Min</div>
+            <div class="status" id="status-s1">Available</div>
+            <div class="time-display" id="time-s1"></div>
+            <div class="btn-group">
+                <button class="start-btn" id="start-s1" onclick="startTimer('s1', 'Snooker 1', 4)">Start</button>
+                <button class="stop-btn" id="stop-s1" onclick="stopTimer('s1')" disabled>Stop</button>
+            </div>
+        </div>
+
+        <div class="table-card snooker-card">
+            <div class="table-title">Snooker 2</div>
+            <div class="rate-info">4 Rs / Min</div>
+            <div class="status" id="status-s2">Available</div>
+            <div class="time-display" id="time-s2"></div>
+            <div class="btn-group">
+                <button class="start-btn" id="start-s2" onclick="startTimer('s2', 'Snooker 2', 4)">Start</button>
+                <button class="stop-btn" id="stop-s2" onclick="stopTimer('s2')" disabled>Stop</button>
+            </div>
+        </div>
+
+        <div class="table-card snooker-card">
+            <div class="table-title">Snooker 3</div>
+            <div class="rate-info">4 Rs / Min</div>
+            <div class="status" id="status-s3">Available</div>
+            <div class="time-display" id="time-s3"></div>
+            <div class="btn-group">
+                <button class="start-btn" id="start-s3" onclick="startTimer('s3', 'Snooker 3', 4)">Start</button>
+                <button class="stop-btn" id="stop-s3" onclick="stopTimer('s3')" disabled>Stop</button>
+            </div>
+        </div>
+
+        <div class="table-card pool-card">
+            <div class="table-title">POOL</div>
+            <div class="rate-info">3 Rs / Min</div>
+            <div class="status" id="status-p1">Available</div>
+            <div class="time-display" id="time-p1"></div>
+            <div class="btn-group">
+                <button class="start-btn" id="start-p1" onclick="startTimer('p1', 'POOL', 3)">Start</button>
+                <button class="stop-btn" id="stop-p1" onclick="stopTimer('p1')" disabled>Stop</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="history-section">
+        <h2>Today's Log</h2>
+        <div class="table-responsive">
+            <table id="history-table">
+                <thead>
+                    <tr>
+                        <th>Table</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Duration</th>
+                        <th>Bill</th>
+                    </tr>
+                </thead>
+                <tbody id="history-body">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let activeSessions = {};
+
+        function formatTime(date) {
+            // Using a shorter time format for mobile screens
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function startTimer(tableId, tableName, rate) {
+            const startTime = new Date();
+            
+            activeSessions[tableId] = {
+                name: tableName,
+                rate: rate,
+                startTime: startTime
+            };
+
+            document.getElementById(`status-${tableId}`).innerText = "Playing";
+            document.getElementById(`status-${tableId}`).style.color = "#e74c3c";
+            document.getElementById(`time-${tableId}`).innerText = `Started: ${formatTime(startTime)}`;
+            
+            document.getElementById(`start-${tableId}`).disabled = true;
+            document.getElementById(`stop-${tableId}`).disabled = false;
+        }
+
+        function stopTimer(tableId) {
+            const endTime = new Date();
+            const session = activeSessions[tableId];
+            
+            const diffInMs = endTime - session.startTime;
+            const diffInMinutes = Math.ceil(diffInMs / 60000); 
+            const totalBill = diffInMinutes * session.rate;
+
+            // Mobile-friendly alert message
+            alert(`${session.name} Bill\n\nTime: ${diffInMinutes} mins\nAmount: ${totalBill} Rs`);
+
+            const tbody = document.getElementById("history-body");
+            const row = tbody.insertRow(0); 
+            row.innerHTML = `
+                <td><strong>${session.name}</strong></td>
+                <td>${formatTime(session.startTime)}</td>
+                <td>${formatTime(endTime)}</td>
+                <td>${diffInMinutes} min</td>
+                <td style="color: #27ae60;"><strong>₹${totalBill}</strong></td>
+            `;
+
+            document.getElementById(`status-${tableId}`).innerText = "Available";
+            document.getElementById(`status-${tableId}`).style.color = "#27ae60";
+            document.getElementById(`time-${tableId}`).innerText = "";
+            
+            document.getElementById(`start-${tableId}`).disabled = false;
+            document.getElementById(`stop-${tableId}`).disabled = true;
+
+            delete activeSessions[tableId];
+        }
+    </script>
+</body>
+</html>
